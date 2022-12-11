@@ -51,18 +51,20 @@ export default {
 .base-video--list {
   max-width: 157px;
   min-width: 120px;
+  width: 50%;
 }
 .card-video {
   display: flex;
   height: 100%;
   flex-direction: column;
 
-  &__details-wrapper {
-    width: fit-content;
-  }
 
   &--list {
     flex-direction: row;
+  }
+
+  &--list .card-video__details-wrapper {
+    width: 50%;
   }
 
   &--grid .card-video__details-wrapper {
