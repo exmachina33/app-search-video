@@ -48,13 +48,6 @@ export default {
 
 <style lang="scss" scoped>
 
-
-.wrapper:after {
-  content: '';
-  display: block;
-  padding-top: 56%;
-}
-
 .base-video--list {
   max-width: 157px;
   min-width: 120px;
@@ -63,6 +56,10 @@ export default {
   display: flex;
   height: 100%;
   flex-direction: column;
+
+  &__details-wrapper {
+    width: fit-content;
+  }
 
   &--list {
     flex-direction: row;
