@@ -52,6 +52,7 @@ export default {
   max-width: 157px;
   min-width: 120px;
   width: 50%;
+  height: fit-content;
 }
 .card-video {
   display: flex;
