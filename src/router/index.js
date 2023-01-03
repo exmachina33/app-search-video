@@ -33,6 +33,17 @@ const routes = [
     ]
   },
   {
+    path: '/registration',
+    name: 'registration',
+    component: () => import('../layouts/EmptyLayout'),
+    children: [
+      {
+        path: '/registration',
+        component: () => import('../components/AppRegistrForm'),
+      }
+    ]
+  },
+  {
     path: '/favorites',
     name: 'favorites',
     meta: { auth: true },

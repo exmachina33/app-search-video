@@ -1,17 +1,17 @@
 <template>
-  <form class="auth-form" @submit.prevent="auth">
+  <form class="auth-form" @submit.prevent="registr">
     <BaseIcon
         class="auth-form__logo"
         name="logo"
         :size="88"
     />
-    <span class="auth-form__label" v-text="`Вход`"/>
+    <span class="auth-form__label" v-text="`Регистрация`"/>
     <BaseInput
         v-model="login"
         class="auth-form__input"
         label="Логин"
         type="text"
-        placeholder="Введите логин"
+        placeholder="Укажите элекстронную почту"
         :error="loginError"
         :error-text="loginErrorText"
     />
@@ -20,15 +20,24 @@
         class="auth-form__input"
         label="Пароль"
         type="password"
-        placeholder="Введите пароль"
+        placeholder="Повторите пароль"
         :error="passwordError"
         :error-text="passwordErrorText"
     />
-    <article class="auth-form__article">Войдите или <router-link class="auth-form__article__link" to="/registration">зарегистрируйтесь</router-link></article>
+    <BaseInput
+        v-model="confirmPassword"
+        class="auth-form__input"
+        label="Подтверждение пароля"
+        type="password"
+        placeholder="Введите пароль"
+        :error="confirmPasswordError"
+        :error-text="confirmPasswordErrorText"
+    />
+    <article class="auth-form__article">Зарегистрируйтесь или <router-link class="auth-form__article__link" to="/login">войдите</router-link></article>
     <BaseBtn
         class="auth-form__btn"
         color="primary"
-        label="Войти"
+        label="Регистрация"
     />
   </form>
 </template>
@@ -39,7 +48,8 @@ import BaseIcon from "@/components/UI/BaseIcon";
 import BaseBtn from "@/components/UI/BaseBtn";
 import {mapActions} from "vuex";
 import { useVuelidate } from '@vuelidate/core'
-import { required, email, minLength } from '@vuelidate/validators'
+import {required, email, minLength, sameAs} from '@vuelidate/validators'
+import {createUser} from "@/api";
 
 export default {
   name: "AppAuthForm",
@@ -47,7 +57,9 @@ export default {
   data() {
     return {
       login: '',
-      password: ''
+      password: '',
+      confirmPassword: '',
+      error: false
     }
   },
   setup () {
@@ -56,24 +68,31 @@ export default {
   validations() {
     return {
       login: { required, $autoDirty: true, email },
-      password: { required, $autoDirty: true, minLength: minLength(6) }
+      password: { required, $autoDirty: true, minLength: minLength(6) },
+      confirmPassword: { sameAsPassword: sameAs(this.password) }
     }
   },
   computed: {
     loginError() {
       if(!this.v$.login.$dirty) return false
-      return this.v$.login.required.$invalid || this.v$.login.email.$invalid
+      return this.v$.login.required.$invalid || this.v$.login.email.$invalid || this.error
     },
     passwordError() {
       if(!this.v$.password.$dirty) return false
       return this.v$.password.required.$invalid || this.v$.password.minLength.$invalid
+    },
+    confirmPasswordError() {
+      if(!this.v$.password.$dirty) return false
+      return this.v$.confirmPassword.$invalid && this.v$.confirmPassword.$dirty
     },
     loginErrorText() {
       switch (true) {
         case this.v$.login.required.$invalid:
           return 'Поле не должно быть пустым';
         case this.v$.login.email.$invalid:
-          return 'Неверный email'
+          return 'Неверный email';
+        case this.error:
+          return 'Такая почта уже используется';
       }
     },
     passwordErrorText() {
@@ -81,7 +100,15 @@ export default {
         case this.v$.password.required.$invalid:
           return 'Поле не должно быть пустым';
         case this.v$.password.minLength.$invalid:
-          return 'Пароль должен содержать минимум 6 символов'
+          return 'Пароль должен содержать минимум 6 символов';
+        case this.v$.confirmPassword.$invalid:
+          return 'Пароли не совпадают';
+      }
+    },
+    confirmPasswordErrorText() {
+      switch (true) {
+        case this.v$.confirmPassword.$invalid:
+          return 'Пароли не совпадают';
       }
     }
   },
@@ -89,12 +116,18 @@ export default {
     ...mapActions({
       loginUser: 'loginUser'
     }),
-    async auth() {
+    async registr() {
+      this.error = false
       const isFormCorrect = await this.v$.$validate()
       if (!isFormCorrect) return
-      const authUser = await this.loginUser({email: this.login, password: this.password})
-      if (!authUser) return
-      this.$router.push('/search')
+      try {
+        await createUser({email: this.login, password: this.password})
+      } catch (error) {
+        this.error = true
+        throw error
+      }
+      if (this.error) return
+      this.$router.push('/login')
     }
   }
 }
