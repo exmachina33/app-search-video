@@ -6,14 +6,10 @@
 </template>
 
 <script>
-
-import axios from "axios";
-import {authUser, createUser} from "@/api";
 import IconList from "@/components/UI/BaseIcon/IconList";
-import AppLayout from "@/layouts/AppLayout";
 
 export default {
-  components: {AppLayout, IconList}
+  components: {IconList}
 }
 </script>
 
